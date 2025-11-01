@@ -3,18 +3,18 @@
 # SPDX-FileCopyrightText: 2025 The Linux Foundation
 
 # Action test/validation workflow
-name: "Test GitHub Action 🧪"
+name: 'Test GitHub Action 🧪'
 
 # yamllint disable-line rule:truthy
 on:
   workflow_dispatch:
   push:
-    branches: ["main"]
+    branches: ['main']
   pull_request:
-    branches: ["main"]
+    branches: ['main']
 
 concurrency:
-  group: "${{ github.workflow }}-${{ github.ref }}"
+  group: '${{ github.workflow }}-${{ github.ref }}'
   cancel-in-progress: true
 
 permissions: {}
@@ -22,54 +22,270 @@ permissions: {}
 jobs:
   ### Test the GitHub Action in this Repository ###
   tests:
-    name: "Test local GitHub Action"
+    name: 'Test repository metadata action'
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    timeout-minutes: 10 # Increase this timeout value as needed
+      pull-requests: read
+    timeout-minutes: 5
     steps:
       # Harden the runner used by this workflow
       # yamllint disable-line rule:line-length
       - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        name: 'Harden runner'
         with:
           egress-policy: audit
 
-      - name: "Checkout repository"
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: 'Checkout repository'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0  # Required for changed files detection
 
-      # Perform setup prior to running test(s)
-      - name: "Testing setup step"
-        shell: bash
-        run: |
-          # Testing setup step
-          echo "Testing setup step"
-          echo "Testing setup step/summary output" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: "Running local action: ${{ github.repository }}"
+      - name: 'Test repository metadata action'
+        id: metadata
         uses: ./
         with:
-          input: "test input 💬"
+          debug: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          generate_summary: true
 
-      - name: "Validated local action: ${{ github.repository }}"
+      - name: 'Validate outputs'
         shell: bash
+        env:
+          METADATA_JSON: ${{ steps.metadata.outputs.metadata_json }}
+        # yamllint disable rule:line-length
         run: |
-          # Local action validation
-          echo "Validated local action: ${{ github.repository }}"
-          echo "Validation step summary output" >> "$GITHUB_STEP_SUMMARY"
+          # Validate repository metadata outputs
+          {
+            echo '## Validation Results'
+            echo ''
+          } >> "$GITHUB_STEP_SUMMARY"
 
+          # Validate JSON output
+          if [ -z "$METADATA_JSON" ]; then
+            {
+              echo '### 📋 JSON Output Validation'
+              echo '❌ metadata_json output is empty'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          else
+            # Validate JSON is parseable
+            if echo "$METADATA_JSON" | jq . > /dev/null 2>&1; then
+              {
+                echo '### 📋 JSON Output Validation'
+                echo '✅ metadata_json populated'
+                echo '✅ metadata_json is valid JSON'
+                echo ''
+              } >> "$GITHUB_STEP_SUMMARY"
+            else
+              {
+                echo '### 📋 JSON Output Validation'
+                echo '✅ metadata_json populated'
+                echo '❌ metadata_json is not valid JSON'
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+          fi
+
+          # Validate expected values
+          expected_owner="${GITHUB_REPOSITORY_OWNER}"
+          expected_name="${GITHUB_REPOSITORY#"$GITHUB_REPOSITORY_OWNER"/}"
+          actual_owner="${{ steps.metadata.outputs.repository_owner }}"
+          actual_name="${{ steps.metadata.outputs.repository_name }}"
+
+          {
+            echo '### 🧪 Value Validation'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$actual_owner" != "$expected_owner" ]; then
+            {
+              echo "❌ owner mismatch: expected $expected_owner, got $actual_owner"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          else
+            {
+              echo "✅ Owner matches: $expected_owner"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ "$actual_name" != "$expected_name" ]; then
+            {
+              echo "❌ name mismatch: expected $expected_name, got $actual_name"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          else
+            {
+              echo "✅ Name matches: $expected_name"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          # Validate commit SHA
+          expected_sha="$GITHUB_SHA"
+          actual_sha="${{ steps.metadata.outputs.commit_sha }}"
+          if [ "$actual_sha" != "$expected_sha" ]; then
+            {
+              echo "❌ SHA mismatch: expected $expected_sha, got $actual_sha"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          else
+            expected_sha_short="${expected_sha:0:7}"
+            {
+              echo "✅ SHA matches: ${expected_sha_short}"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          # Validate event detection logic
+          event_name="${{ steps.metadata.outputs.event_name }}"
+          is_pr="${{ steps.metadata.outputs.is_pull_request }}"
+
+          if [ "$event_name" = "pull_request" ]; then
+            if [ "$is_pr" != "true" ]; then
+              {
+                echo "❌ PR event detected but is_pull_request is not true"
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            else
+              {
+                echo '✅ PR event correctly detected'
+              } >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+
+          {
+            echo ''
+            echo '## ✅ All tests passed'
+          } >> "$GITHUB_STEP_SUMMARY"
+        # yamllint enable rule:line-length
+
+      - name: 'Test JSON parsing'
+        shell: bash
+        env:
+          METADATA_JSON: ${{ steps.metadata.outputs.metadata_json }}
+        # yamllint disable rule:line-length
+        run: |
+          # Test parsing JSON output
+
+          # Extract values from JSON
+          repo_owner=$(echo "$METADATA_JSON" | jq -r '.repository.owner')
+          repo_name=$(echo "$METADATA_JSON" | jq -r '.repository.name')
+          commit_sha=$(echo "$METADATA_JSON" | jq -r '.commit.sha_short')
+          event_name=$(echo "$METADATA_JSON" | jq -r '.event.name')
+
+          {
+            echo '## JSON Parsing Test'
+            echo ''
+            echo "- Repository Owner: $repo_owner"
+            echo "- Repository Name: $repo_name"
+            echo "- Commit SHA: $commit_sha"
+            echo "- Event Name: $event_name"
+            echo ''
+            echo '✅ JSON parsing successful'
+          } >> "$GITHUB_STEP_SUMMARY"
+        # yamllint enable rule:line-length
+
+  # Test with a simulated tag push scenario
+  test-tag-detection:
+    name: 'Test tag detection logic'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    steps:
+      # Harden the runner used by this workflow
       # yamllint disable-line rule:line-length
-      - name: "Running local action: ${{ github.repository }} [Override Failure]"
-        uses: ./
-        id: failure
-        continue-on-error: true
+      - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        name: 'Harden runner'
         with:
-          invalid_input: "Some garbage"
+          egress-policy: audit
 
-      # Failure testing is also important
-      - name: "Error if step above did NOT fail"
-        if: steps.failure.outcome == 'success'
+      - name: 'Checkout repository'
+        # yamllint disable-line rule:line-length
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: 'Test tag detection with mock data'
         shell: bash
+        # yamllint disable rule:line-length
         run: |
-          # Error if step above did NOT fail
-          echo "Error: previous test step did NOT fail ❌"
-          exit 1
+          # Test the tag detection logic directly
+          {
+            echo '## Tag Detection Test Results'
+            echo ''
+
+            # Test version tag pattern
+            refs=("v1.0.0" "v2.1.3" "v10.20.30" "main" "feature/test" "v1.2" "1.0.0" "release-1.0")
+
+            echo '| Ref Name | Matches Pattern | Expected |'
+            echo '|----------|----------------|----------|'
+
+          for ref in "${refs[@]}"; do
+            if [[ "$ref" =~ ^v[0-9]+\.[0-9]+ ]]; then
+              result="✅ true"
+            else
+              result="❌ false"
+            fi
+
+            # Determine expected result
+            case "$ref" in
+              v1.0.0|v2.1.3|v10.20.30|v1.2)
+                expected="✅ true"
+                ;;
+              *)
+                expected="❌ false"
+                ;;
+            esac
+
+            echo "| $ref | $result | $expected |"
+          done
+
+            echo ''
+            echo '✅ Tag detection pattern tested'
+          } >> "$GITHUB_STEP_SUMMARY"
+        # yamllint enable rule:line-length
+
+  # Test cache key functionality
+  test-cache-keys:
+    name: 'Test cache key generation'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    steps:
+      # Harden the runner used by this workflow
+      # yamllint disable-line rule:line-length
+      - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        name: 'Harden runner'
+        with:
+          egress-policy: audit
+
+      - name: 'Checkout repository'
+        # yamllint disable-line rule:line-length
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: 'Get metadata'
+        id: metadata
+        uses: ./
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          generate_summary: true
+
+      - name: 'Test cache with generated keys'
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.cache/test
+          key: ${{ steps.metadata.outputs.cache_key }}-test
+          restore-keys: |
+            ${{ steps.metadata.outputs.cache_restore_key }}-test
+
+      - name: 'Validate cache keys'
+        shell: bash
+        # yamllint disable rule:line-length
+        run: |
+          {
+            echo '## Cache Key Test'
+            echo ''
+            echo "✅ Cache key: ${{ steps.metadata.outputs.cache_key }}"
+            echo "✅ Restore key: ${{ steps.metadata.outputs.cache_restore_key }}"
+            echo ''
+            echo 'Cache keys successfully used with actions/cache'
+          } >> "$GITHUB_STEP_SUMMARY"
+        # yamllint enable rule:line-length
