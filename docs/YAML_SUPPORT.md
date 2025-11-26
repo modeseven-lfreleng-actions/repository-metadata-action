@@ -36,14 +36,14 @@ metadata generated from the same source data.
 
 ### JSON vs YAML
 
-| Feature | JSON | YAML |
-|---------|------|------|
-| **Compactness** | ✅ More compact | ❌ More verbose |
-| **Readability** | ❌ Less readable | ✅ More readable   |
-| **Parsing Speed** | ✅ Faster | ❌ Slower |
-| **Comments** | ❌ No support | ✅ Supports comments |
-| **GitHub Actions** | ✅ Native support | ⚠️ Needs `yq` |
-| **Best For** | Automation, APIs | Humans, configs    |
+| Feature            | JSON             | YAML                |
+| ------------------ | ---------------- | ------------------- |
+| **Compactness**    | ✅ More compact   | ❌ More verbose      |
+| **Readability**    | ❌ Less readable  | ✅ More readable     |
+| **Parsing Speed**  | ✅ Faster         | ❌ Slower            |
+| **Comments**       | ❌ No support     | ✅ Supports comments |
+| **GitHub Actions** | ✅ Native support | ⚠️ Needs `yq`       |
+| **Best For**       | Automation, APIs | Humans, configs     |
 
 **Recommendation**: Use JSON for automation, YAML for human review and
 debugging.
@@ -197,14 +197,18 @@ input:
 
 ### Format Selection Use Cases
 
-| Scenario | Recommended Format | Rationale |
-|----------|-------------------|-----------|
-| CI/CD automation | `json` | Faster parsing, more compact |
-| Documentation generation | `yaml` | More readable in rendered docs |
-| Compliance/audit | `json,yaml` | Flexibility for different tools |
-| Local development | `yaml` | Easier to read and debug |
-| API integration | `json` | Standard web API format |
-| Configuration management | `yaml` | Ansible, Helm, etc. prefer YAML |
+<!-- markdownlint-disable MD013 -->
+
+| Scenario                 | Recommended Format | Rationale                       |
+| ------------------------ | ------------------ | ------------------------------- |
+| CI/CD automation         | `json`             | Faster parsing, more compact    |
+| Documentation generation | `yaml`             | More readable in rendered docs  |
+| Compliance/audit         | `json,yaml`        | Flexibility for different tools |
+| Local development        | `yaml`             | Easier to read and debug        |
+| API integration          | `json`             | Standard web API format         |
+| Configuration management | `yaml`             | Ansible, Helm, etc. prefer YAML |
+
+<!-- markdownlint-enable MD013 -->
 
 ## Processing YAML Output
 
@@ -389,15 +393,15 @@ Or use Docker:
 
 Both actions now follow the same pattern:
 
-| Feature | repository-metadata-action | build-metadata-action |
-|---------|---------------------------|----------------------|
-| JSON output | ✅ `metadata_json` | ✅ `metadata_json` |
-| YAML output | ✅ `metadata_yaml` | ✅ `metadata_yaml` |
-| Artifact upload | ✅ Configurable | ✅ Configurable |
-| Format control | ✅ `artifact_formats` | ✅ `artifact_formats` |
-| Default formats | `json,yaml` | `json,yaml` |
-| Validation | ✅ Built-in (via tools) | ✅ Explicit validation |
-| Error handling | ✅ Fail fast | ✅ Fail fast |
+| Feature         | repository-metadata-action | build-metadata-action |
+| --------------- | -------------------------- | --------------------- |
+| JSON output     | ✅ `metadata_json`          | ✅ `metadata_json`     |
+| YAML output     | ✅ `metadata_yaml`          | ✅ `metadata_yaml`     |
+| Artifact upload | ✅ Configurable             | ✅ Configurable        |
+| Format control  | ✅ `artifact_formats`       | ✅ `artifact_formats`  |
+| Default formats | `json,yaml`                | `json,yaml`           |
+| Validation      | ✅ Built-in (via tools)     | ✅ Explicit validation |
+| Error handling  | ✅ Fail fast                | ✅ Fail fast           |
 
 **Design Consistency**: Both actions share:
 

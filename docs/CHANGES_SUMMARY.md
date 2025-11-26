@@ -175,7 +175,7 @@ Added row:
 
 <!-- markdownlint-disable MD013 -->
 ```markdown
-| artifact_formats   | Comma-separated list of formats to upload (json, yaml) | No   | json,yaml          |
+| artifact_formats | Comma-separated list of formats to upload (json, yaml) | No | json,yaml |
 ```
 <!-- markdownlint-enable MD013 -->
 
@@ -422,9 +422,9 @@ Users can adopt YAML features when ready:
 
 ### Required Tools
 
-| Tool | Purpose | Availability |
-|------|---------|--------------|
-| `jq` | JSON generation | Pre-installed on all runners |
+| Tool | Purpose         | Availability                           |
+| ---- | --------------- | -------------------------------------- |
+| `jq` | JSON generation | Pre-installed on all runners           |
 | `yq` | YAML conversion | Pre-installed on GitHub-hosted runners |
 
 ### Self-Hosted Runners
@@ -447,12 +447,12 @@ chmod +x /usr/local/bin/yq
 
 ### Artifact Size
 
-| Format | Size (typical) |
-|--------|----------------|
-| metadata.json | 1-3 KB |
-| metadata-pretty.json | 2-5 KB |
-| metadata.yaml | 2-5 KB |
-| **Total (all formats)** | 5-13 KB |
+| Format                  | Size (typical) |
+| ----------------------- | -------------- |
+| metadata.json           | 1-3 KB         |
+| metadata-pretty.json    | 2-5 KB         |
+| metadata.yaml           | 2-5 KB         |
+| **Total (all formats)** | 5-13 KB        |
 
 **Impact**: Negligible - well within GitHub's artifact limits.
 
@@ -460,14 +460,14 @@ chmod +x /usr/local/bin/yq
 
 ### Matching Interface
 
-| Feature | repository-metadata-action | build-metadata-action |
-|---------|---------------------------|----------------------|
-| JSON output | ✅ `metadata_json` | ✅ `metadata_json` |
-| YAML output | ✅ `metadata_yaml` | ✅ `metadata_yaml` |
-| Format control | ✅ `artifact_formats` | ✅ `artifact_formats` |
-| Default formats | `json,yaml` | `json,yaml` |
-| Artifact files | `metadata.{json,yaml}` | `metadata.{json,yaml}` |
-| Error handling | Fail fast | Fail fast |
+| Feature         | repository-metadata-action | build-metadata-action  |
+| --------------- | -------------------------- | ---------------------- |
+| JSON output     | ✅ `metadata_json`          | ✅ `metadata_json`      |
+| YAML output     | ✅ `metadata_yaml`          | ✅ `metadata_yaml`      |
+| Format control  | ✅ `artifact_formats`       | ✅ `artifact_formats`   |
+| Default formats | `json,yaml`                | `json,yaml`            |
+| Artifact files  | `metadata.{json,yaml}`     | `metadata.{json,yaml}` |
+| Error handling  | Fail fast                  | Fail fast              |
 
 ### Benefits
 
