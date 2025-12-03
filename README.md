@@ -60,15 +60,15 @@ steps:
 
 <!-- markdownlint-disable MD013 -->
 
-| Variable Name      | Description                                        | Required | Default            |
-| ------------------ | -------------------------------------------------- | -------- | ------------------ |
-| debug              | Enable debug mode for verbose output               | No       | false              |
-| github_token       | GitHub token for API access (changed files)        | No       | ${{ github.token }} |
-| generate_summary   | Generate summary in GITHUB_STEP_SUMMARY            | No       | false              |
-| artifact_upload    | Upload metadata as workflow artifact               | No       | true               |
-| artifact_formats   | Comma-separated list of formats to upload (json, yaml) | No   | json,yaml          |
-| change_detection   | Changed files detection method: 'git' or 'github_api' | No    | (auto)             |
-| git_fetch_depth    | Depth for git fetch --deepen in shallow clones     | No       | 15                 |
+| Variable Name    | Description                                            | Required | Default             |
+| ---------------- | ------------------------------------------------------ | -------- | ------------------- |
+| debug            | Enable debug mode for verbose output                   | No       | false               |
+| github_token     | GitHub token for API access (changed files)            | No       | ${{ github.token }} |
+| generate_summary | Generate summary in GITHUB_STEP_SUMMARY                | No       | false               |
+| artifact_upload  | Upload metadata as workflow artifact                   | No       | true                |
+| artifact_formats | Comma-separated list of formats to upload (json, yaml) | No       | json,yaml           |
+| change_detection | Changed files detection method: 'git' or 'github_api'  | No       | (auto)              |
+| git_fetch_depth  | Depth for git fetch --deepen in shallow clones         | No       | 15                  |
 
 <!-- markdownlint-enable MD013 -->
 
@@ -92,16 +92,16 @@ steps:
 
 <!-- markdownlint-disable MD013 -->
 
-| Variable Name        | Description                                           |
-| -------------------- | ----------------------------------------------------- |
-| event_name           | The name of the event that triggered the workflow     |
-| tag_push_event       | Returns true if a version tag push triggered the event|
-| is_tag_push          | Returns true if the event is a tag push               |
-| is_branch_push       | Returns true if the event is a branch push            |
-| is_pull_request      | Returns true if the event is a pull request           |
-| is_release           | Returns true if the event is a release                |
-| is_schedule          | Returns true if the event runs on a schedule          |
-| is_workflow_dispatch | Returns true if the event is manually triggered       |
+| Variable Name        | Description                                            |
+| -------------------- | ------------------------------------------------------ |
+| event_name           | The name of the event that triggered the workflow      |
+| tag_push_event       | Returns true if a version tag push triggered the event |
+| is_tag_push          | Returns true if the event is a tag push                |
+| is_branch_push       | Returns true if the event is a branch push             |
+| is_pull_request      | Returns true if the event is a pull request            |
+| is_release           | Returns true if the event is a release                 |
+| is_schedule          | Returns true if the event runs on a schedule           |
+| is_workflow_dispatch | Returns true if the event is manually triggered        |
 
 <!-- markdownlint-enable MD013 -->
 
@@ -160,10 +160,10 @@ steps:
 
 <!-- markdownlint-disable MD013 -->
 
-| Variable Name      | Description                                       |
-| ------------------ | ------------------------------------------------- |
-| cache_key          | Generated cache key based on repository and commit|
-| cache_restore_key  | Generated cache restore key prefix                |
+| Variable Name     | Description                                        |
+| ----------------- | -------------------------------------------------- |
+| cache_key         | Generated cache key based on repository and commit |
+| cache_restore_key | Generated cache restore key prefix                 |
 
 <!-- markdownlint-enable MD013 -->
 
@@ -182,9 +182,9 @@ steps:
 
 <!-- markdownlint-disable MD013 -->
 
-| Variable Name   | Description                                        |
-| --------------- | -------------------------------------------------- |
-| artifact_path   | Path to the metadata artifact files (if uploaded) |
+| Variable Name   | Description                                                |
+| --------------- | ---------------------------------------------------------- |
+| artifact_path   | Path to the metadata artifact files (if uploaded)          |
 | artifact_suffix | Unique 4-character alphanumeric suffix for artifact naming |
 
 <!-- markdownlint-enable MD013 -->
